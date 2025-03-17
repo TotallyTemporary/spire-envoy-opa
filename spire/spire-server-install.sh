@@ -68,7 +68,7 @@ plugins {
 
     NodeAttestor "x509pop" {
         plugin_data {
-            ca_bundle_path = "${SPIRE_SERVER_CONF_DIR}/ca.crt"
+            ca_bundle_path = "${SPIRE_SERVER_CONF_DIR}/x509pop.crt"
         }
     }
 }
