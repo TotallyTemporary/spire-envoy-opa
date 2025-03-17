@@ -32,3 +32,14 @@ sudo -u edge-service spire-agent api fetch x509 -socketPath /run/spire-agent/pub
 # Edge device 1
 Installed agent
 Node CN=edge-device-1.paavo-rotsten.org
+
+## Entries
+sudo -u spire-server spire-server entry create -node -spiffeID spiffe://paavo-rotsten.org/edge-device-1 -selector x509pop:subject:cn:edge-device-1.paavo-rotsten.org -socketPath /run/spire-server/private/api.sock
+
+sudo -u spire-server spire-server entry create -spiffeID spiffe://paavo-rotsten.org/edge-device -parentID spiffe://paavo-rotsten.org/edge-device-1 -selector unix:user:edge-device -socketPath /run/spire-server/private/api.sock
+
+## User
+sudo useradd -r -g spire-services -d "/var/lib/edge-device" -s /usr/sbin/nologin edge-device
+
+## Test
+sudo -u edge-device spire-agent api fetch x509 -socketPath /run/spire-agent/public/api.sock
