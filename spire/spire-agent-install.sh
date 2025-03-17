@@ -4,9 +4,9 @@ SPIRE_DIRECTORY="spire-1.11.2"
 SPIRE_INSTALL_PACKAGE="https://github.com/spiffe/spire/releases/download/v1.11.2/${SPIRE_DIRECTORY}-linux-arm64-musl.tar.gz"
 
 TRUST_DOMAIN="paavo-rotsten.org"
-SPIRE_SERVER_IP="192.168.32.55"
+SPIRE_SERVER_IP="158.180.45.228"
 SPIRE_SERVER_PORT="8081"
-COMMON_NAME="edge-device-1.paavo-rotsten.org"
+COMMON_NAME="cloud-server.paavo-rotsten.org"
 
 # Provided files
 SPIRE_SERVER_TRUST_CERT="./ca.crt"
