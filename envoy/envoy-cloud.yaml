@@ -1,0 +1,89 @@
+node:
+  id: cloud
+  cluster: cloud-cluster
+
+static_resources:
+  listeners:
+  - name: listener_0
+    address:
+      socket_address:
+        address: 0.0.0.0
+        port_value: 3002
+    filter_chains:
+    - filters:
+      - name: envoy.filters.network.http_connection_manager
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+          access_log:
+          - name: envoy.access_loggers.stdout
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.access_loggers.stream.v3.StdoutAccessLog
+          stat_prefix: ingress_http
+          http_filters:
+          - name: envoy.filters.http.router
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+          route_config:
+            name: local_route
+            virtual_hosts:
+            - name: local_service
+              domains: ["*"]
+              routes:
+              - match:
+                  prefix: "/"
+                route:
+                  cluster: local_service
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
+          common_tls_context:
+            tls_certificate_sds_secret_configs:
+            - name: "spiffe://paavo-rotsten.org/cloud-service" # Our SPIFFE ID 
+              sds_config:
+                resource_api_version: V3
+                api_config_source:
+                  api_type: GRPC
+                  transport_api_version: V3
+                  grpc_services:
+                    envoy_grpc:
+                      cluster_name: spire_agent
+            combined_validation_context:
+              default_validation_context: {}
+              validation_context_sds_secret_config:
+                name: "spiffe://paavo-rotsten.org" # Trust bundle validation
+                sds_config:
+                  resource_api_version: V3
+                  api_config_source:
+                    api_type: GRPC
+                    transport_api_version: V3
+                    grpc_services:
+                      envoy_grpc:
+                        cluster_name: spire_agent
+            tls_params:
+              ecdh_curves:
+                - X25519:P-256:P-521:P-384
+
+  clusters:
+  - name: local_service
+    type: strict_dns
+    load_assignment:
+      cluster_name: local_service
+      endpoints:	
+      - lb_endpoints:	
+        - endpoint:	
+            address:	
+              socket_address:	
+                address: 127.0.0.1
+                port_value: 4002
+  - name: spire_agent
+    connect_timeout: 0.25s
+    http2_protocol_options: {}
+    load_assignment:	
+      cluster_name: spire_agent
+      endpoints:	
+      - lb_endpoints:	
+        - endpoint:	
+            address:	
+              pipe:	
+                path: /run/spire-agent/public/api.sock
