@@ -11,6 +11,9 @@ sudo -u spire-server spire-server entry create -spiffeID spiffe://paavo-rotsten.
 # User
 sudo useradd -r -g spire-services -d "/var/lib/cloud-service" -s /usr/sbin/nologin cloud-service
 
+# Test
+sudo -u cloud-service spire-agent api fetch x509 -socketPath /run/spire-agent/public/api.sock
+
 ## Edge node 1
 
 Installed agent
