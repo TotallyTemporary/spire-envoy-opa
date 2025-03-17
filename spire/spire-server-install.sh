@@ -38,6 +38,7 @@ server {
     log_level = "DEBUG"
     ca_ttl = "168h"
     default_x509_svid_ttl = "48h"
+    socket_path = "${SPIRE_SERVER_SOCKET}"
 }
 
 plugins {
