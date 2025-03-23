@@ -27,10 +27,11 @@ def receive_data():
     
     image_bytes = file.read()
     image_np = np.frombuffer(image_bytes, np.uint8)
-    img = cv2.imdecode(image_np, cv2.IMREAD_COLOR)
+    original_img = cv2.imdecode(image_np, cv2.IMREAD_COLOR)
+    original_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB)
 
     # https://medium.com/@abbessafa1998/motion-detection-techniques-with-code-on-opencv-18ed2c1acfaf
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) # greyscale
+    img = cv2.cvtColor(original_img, cv2.COLOR_RGB2GRAY) # greyscale
 
     with lock:
         if background is None:
@@ -45,11 +46,12 @@ def receive_data():
     if pixels_count >= PIXELS_CHANGED_THRESHOLD:
         with lock:
             print("Motion! ", pixels_count)
-            cv2.imwrite("diff.png", diff)
-            cv2.imwrite("mask.png", motion_mask)
-            cv2.imwrite("background.png", background)
+            # cv2.imwrite("diff.png", diff)
+            # cv2.imwrite("mask.png", motion_mask)
+            # cv2.imwrite("background.png", background)
+            # cv2.imwrite("image.png", original_img)
 
     return {"data": "success"}, 200
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=3002, threaded=True) # Envoy will make this 3002
+    app.run(host="127.0.0.1", port=4002, threaded=True) # Envoy will make this 3002
