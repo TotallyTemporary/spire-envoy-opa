@@ -1,10 +1,10 @@
 set -euo pipefail
 
 # Provided files
-ENVOY_CONFIG="./envoy-edge-node.yaml"
+ENVOY_CONFIG="./envoy-edge-device.yaml"
 
-USER="edge-service"
-SERVICE_NAME="edge-service"
+USER="edge-device"
+SERVICE_NAME="edge-device"
 ENVOY_ALL_CONFS_DIR="/etc/envoy"
 ENVOY_CONF_DIR="${ENVOY_ALL_CONFS_DIR}/${SERVICE_NAME}"
 ENVOY_DATA_DIR="/var/lib/envoy/${SERVICE_NAME}"
@@ -17,7 +17,7 @@ sudo cp "${ENVOY_CONFIG}" "${ENVOY_CONF_DIR}/config.yaml"
 # Create user
 if ! id -u "${USER}" >/dev/null 2>&1; then
     sudo groupadd envoy
-    sudo useradd -r -g envoy,spire-services -d "${ENVOY_DATA_DIR}" -s /usr/sbin/nologin "${USER}"
+    sudo useradd -r -g envoy -G spire-services -d "${ENVOY_DATA_DIR}" -s /usr/sbin/nologin "${USER}"
 fi
 
 # Create systemd service
