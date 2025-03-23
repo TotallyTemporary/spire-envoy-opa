@@ -8,3 +8,5 @@ sudo nerdctl build -t custom-envoy:latest -f Dockerfile .
 sudo nerdctl create --name temp custom-envoy:latest
 sudo nerdctl cp custom-envoy:/home/envoy_builder/envoy/bazel-bin/source/exe/envoy-static ./
 sudo nerdctl cp custom-envoy:/home/envoy_builder/envoy/bazel-bin/source/exe/envoy-static.stripped ./
+
+# Choose either stripped or full and move it to /usr/bin/envoy

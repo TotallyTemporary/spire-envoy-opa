@@ -1,0 +1,85 @@
+node:
+  id: edge-node
+  cluster: edge-node-cluster
+
+static_resources:
+  listeners:
+  # Remap local 4002 to edge node 3002
+  - name: outbound_to_edge_node
+    address:
+      socket_address:
+        address: 127.0.0.1
+        port_value: 4002 # -> 3002
+    filter_chains:
+    - filters:
+      - name: envoy.filters.network.http_connection_manager
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+          stat_prefix: ingress_http
+          http_filters:
+          - name: envoy.filters.http.router
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+          route_config:
+            name: outbound_edge_node
+            virtual_hosts:
+            - name: edge_node
+              domains: ["*"]
+              routes:
+              - match:
+                  prefix: "/"
+                route:
+                  cluster: edge_node
+  clusters:
+  - name: spire_agent
+    connect_timeout: 0.25s
+    http2_protocol_options: {}
+    load_assignment:	
+      cluster_name: spire_agent
+      endpoints:	
+      - lb_endpoints:	
+        - endpoint:	
+            address:	
+              pipe:	
+                path: /run/spire-agent/public/api.sock
+  - name: edge_node
+    type: strict_dns
+    load_assignment:
+      cluster_name: edge_node
+      endpoints:	
+      - lb_endpoints:	
+        - endpoint:	
+            address:	
+              socket_address:	
+                address: "192.168.32.55"
+                port_value: 3002
+    transport_socket:
+      name: envoy.transport_sockets.tls
+      typed_config:
+        "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+        common_tls_context:
+          tls_certificate_sds_secret_configs:
+          - name: "spiffe://paavo-rotsten.org/edge-device" # Our SPIFFE ID
+            sds_config:
+              resource_api_version: V3
+              api_config_source:
+                api_type: GRPC
+                transport_api_version: V3
+                grpc_services:
+                  envoy_grpc:
+                    cluster_name: spire_agent
+          combined_validation_context:
+            default_validation_context: {}
+            validation_context_sds_secret_config:
+              name: "spiffe://paavo-rotsten.org" # Trust bundle
+              sds_config:
+                resource_api_version: V3
+                api_config_source:
+                  api_type: GRPC
+                  transport_api_version: V3
+                  grpc_services:
+                    envoy_grpc:
+                      cluster_name: spire_agent
+          tls_params:
+            ecdh_curves:
+              - X25519:P-256:P-521:P-384
