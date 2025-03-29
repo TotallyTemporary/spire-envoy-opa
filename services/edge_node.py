@@ -19,6 +19,11 @@ app = Flask(__name__)
 lock = threading.Lock()
 background = None
 
+# For load testing
+@app.route("/", methods=["GET"])
+def test():
+    return {}, 204
+
 @app.route("/receive", methods=["POST"])
 def receive_data():
     global lock, background
@@ -28,7 +33,6 @@ def receive_data():
     image_bytes = file.read()
     image_np = np.frombuffer(image_bytes, np.uint8)
     original_img = cv2.imdecode(image_np, cv2.IMREAD_COLOR)
-    original_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB)
 
     # https://medium.com/@abbessafa1998/motion-detection-techniques-with-code-on-opencv-18ed2c1acfaf
     img = cv2.cvtColor(original_img, cv2.COLOR_RGB2GRAY) # greyscale
@@ -54,4 +58,5 @@ def receive_data():
     return {"data": "success"}, 200
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=4002, threaded=True) # Envoy will make this 3002
+    # app.run(host="127.0.0.1", port=4002, threaded=True) # Envoy will make this 3002
+    app.run(host="0.0.0.0", port=4002, threaded=True) # not secure, bypasses auth, but we will use for testing.
