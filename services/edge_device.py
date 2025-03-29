@@ -8,6 +8,10 @@ from picamera2.encoders import MJPEGEncoder, Quality
 from picamera2.outputs import FileOutput
 from picamera2 import Picamera2
 
+from flask import Flask, request
+
+app = Flask(__name__)
+
 CAMERA_RES = (1280, 720)
 CAMERA_FPS = 24
 SENDER_MAX_CONCURRENT = 6  # Requests currently being served
@@ -19,6 +23,12 @@ EDGE_NODE_PORT = 4002
 FT_START_FRAMETIME = 1 / 20
 FT_SUCCESS_DECREASE = 0.98
 FT_FAILURE_INCREASE = 1.05
+
+
+# For load testing
+@app.route("/", methods=["GET"])
+def test():
+    return {}, 204
 
 # Largely copied from https://github.com/raspberrypi/picamera2/blob/main/examples/mjpeg_server.py
 class StreamingOutput(io.BufferedIOBase):
@@ -149,3 +159,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # app.run(host="127.0.0.1", port=3002, threaded=True) 
