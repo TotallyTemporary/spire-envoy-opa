@@ -1,3 +1,7 @@
+# Notes
+This repository incorrectly refers to an end device as an 'edge device'.
+
+
 # Cloud server
 
 Installed both server and agent
